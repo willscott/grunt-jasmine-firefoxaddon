@@ -11,36 +11,54 @@ module.exports = function (grunt) {
 
   var activeReporters = {};
  
-  grunt.registerTask('jasmine_firefoxaddon', [
-    'mozilla-addon-sdk:1_17',
-    'jasmine_firefoxaddon_build',
-    'mozilla-cfx:test',
-    'jasmine_firefoxaddon_report'
-  ]);
-
-  grunt.registerMultiTask('jasmine_firefoxaddon_build', pkg.description, function() {
-    var name = this.target;
-    
+  grunt.registerMultiTask('jasmine_firefoxaddon', pkg.description, function () {
     var ctx = this.options({
-      template: 'tasks/template/',
-      helper: undefined,
-      timeout : 10000,
-      port: 9989,
-      stayOpen: true
+        template: __dirname + '/../tasks/jasmine-firefoxaddon',
+        version: '2.0.0',
+        outfile: '.build',
+        paths: undefined,
+        binary: undefined,
+        keepRunner: false,
+        port: 9989,
+        timeout : 30000,
+        flags: []
     });
 
+    if (grunt.option('debug')) {
+      grunt.log.debug(JSON.stringify(ctx));
+    }
+
+    ctx.files = this.files;
     if (!this.files) {
       grunt.log.error('No app target provided.');
       return false;
     }
 
-    for (var target in this.data.files) {
-      if (this.data.files.hasOwnProperty(target)) {
-        ctx.target = target;
-        ctx.files = this.data.files[target];
-        buildSpec(ctx);
-      }
-    }
+
+    process.on('SIGINT', function () {
+      cleanup(ctx);
+    });
+  
+    grunt.config.set('jasmine_firefoxaddon_build', {
+      ctx: ctx
+    });
+    grunt.config.set('jasmine_firefoxaddon_report', {
+      ctx: ctx
+    });
+
+    grunt.task.run([
+      'mozilla-addon-sdk:1_17',
+      'jasmine_firefoxaddon_build',
+      'mozilla-cfx:test',
+      'jasmine_firefoxaddon_report'
+    ]);
+  });
+
+
+  grunt.registerMultiTask('jasmine_firefoxaddon_build', pkg.description, function() {
+    var ctx = grunt.config.get('ctx');
+
+    buildSpec(ctx);
     
     if (!activeReporters[ctx.port]) {
       var web = function() {
@@ -146,56 +164,65 @@ module.exports = function (grunt) {
     }
   });
   
-  function getFiles(specs) {
-    var out = [];
-    if (specs instanceof Array) {
-      specs.forEach(function(spec) {
-        out = out.concat(getFiles(spec));
-      });
-    } else if (specs.path) {
-      out = glob.sync(specs.path).map(function(path) {
-        return {
-          path: path,
-          include: specs.include,
-          name: specs.name || path
+  function addFiles(files, to, tagFilter) {
+    var tags = '';
+
+    files.forEach(function (file) {
+      file.src.forEach(function (f) {
+        var dest;
+        if (file.dest && grunt.file.isDir(file.dest)) {
+          dest = f;
+        } else {
+          dest = file.dest || f;
+        }
+        if (grunt.file.isFile(f)) {
+          if (grunt.file.isMatch(tagFilter, f)) {
+            tags += "register(self.data.url('" + dest + "'));\n";
+          }
+          grunt.file.copy(f, to + '/data/' + dest);
         }
       });
-    } else {
-      out = glob.sync(specs);
-    }
-    return out;
-  }
-  
-  function buildSpec(ctx) {
-    ctx.dir = fs.mkdirpSync(ctx.target) || fs.realpathSync(ctx.target);
+    });
 
-    var scripts = getFiles(ctx.files);
-    if (ctx.helper) {
-      scripts = scripts.concat(getFiles(ctx.helper));
+    return tags;
+  }
+
+  function buildSpec(ctx) {
+    grunt.log.write('Building...');
+    grunt.file.mkdir(ctx.outfile);
+    var dest = ctx.outfile,
+      tags = "";
+
+    // Copy the template
+    grunt.file.recurse(ctx.template, function (file, root, dir, filename) {
+      grunt.file.copy(file, dest + '/' + filename);
+    });
+    // Copy Jasmine
+    grunt.file.recurse(__dirname + '/../vendor/jasmine-core-' + ctx.version,
+      function (file, root, dir, filename) {
+        if (!dir) {
+          dir = '';
+        }
+        grunt.file.copy(file, dest + '/lib/jasmine-core/' + dir + '/' + filename);
+      });
+    // Make a profile directory.
+    grunt.file.mkdir(ctx.outfile + '/profile');
+
+    // Copy user files.
+    if (!ctx.paths) {
+      ctx.paths = [];
+      ctx.files.forEach(function(file) {
+        ctx.paths = ctx.paths.concat(grunt.file.expand(file.src));
+      });
     }
-    var toLink = "";
-    
-    fs.mkdirpSync(ctx.dir + '/data');
-    for (var i = 0; i < scripts.length; i++) {
-      var s = scripts[i];
-      var spath = s.path || s;
-      var sname = s.name || s;
-      if (!s.path || s.include) {
-        toLink += "underTest = self.data.url('" + sname + "');\n";
-      }
-      var parent = path.dirname(sname);
-      fs.mkdirpSync(ctx.dir + '/data/' + parent);
-      fs.copySync(spath, ctx.dir + '/data/' + sname);
-    }
-    toLink += "finishLoad();";
-    if (ctx.stayOpen) {
-      toLink += "\nstayOpen = true;";
-    }
-    var buffer = new Buffer(toLink);
-    
-    fs.copySync(ctx.template, ctx.dir);
-    var fd = fs.openSync(ctx.dir + '/lib/main.js', 'a');
-    fs.writeSync(fd, buffer, 0, buffer.length, null);
-    grunt.log.ok('Extension staged in ' + ctx.target);
+    tags += addFiles(ctx.files, dest, ctx.paths);
+
+    tags += "finishLoad(" + ctx.port + ");";
+
+    // Update the template with found specs.
+    tags = grunt.file.read(dest + '/lib/main.js') + tags;
+    grunt.file.write(dest + '/lib/main.js', tags);
+
+    grunt.log.writeln(chalk.green('Done.'));
   }
 };
