@@ -35,6 +35,28 @@ module.exports = function (grunt) {
     return tags;
   }
 
+  function cleanup(ctx) {
+    var good = true;
+    if (ctx.cleanupTimeout) {
+      clearTimeout(ctx.cleanupTimeout);
+    }
+
+    if (!ctx.status) {
+      grunt.fail.fatal(chalk.red('Timed out'));
+      good = false;
+    } else if (ctx.status.failed === 0) {
+      grunt.log.ok(chalk.green('0 failures'));
+    } else {
+      grunt.log.error(chalk.red(ctx.status.failed + ' failures'));
+      good = false;
+    }
+
+    ctx.web.close();
+    grunt.file['delete'](ctx.outfile);
+
+    return (good || new Error('One or more tests failed.'));
+  }
+  
   function buildSpec(ctx) {
     grunt.log.write('Building...');
     grunt.file.mkdir(ctx.outfile);
@@ -85,7 +107,7 @@ module.exports = function (grunt) {
       if (req.url === '/') {
         res.writeHead(200, {'Content-Type': 'text/html'});
         res.end('<html>' +
-                'Reporting server for grunt-jasmine-chromeapp.' +
+                'Reporting server for grunt-jasmine-firefoxaddon.' +
                 '</html>');
       } else if (req.url === '/put') {
         req.setEncoding('utf8');
@@ -104,16 +126,13 @@ module.exports = function (grunt) {
       } else if (req.url === '/ready') {
         grunt.log.writeln(chalk.green('Done.'));
         res.end('Okay.');
-        if (ctx.onMessage) {
-          ctx.onMessage();
-        }
+        clearTimeout(ctx.cleanupTimeout);
       }
     }).listen(ctx.port);
 
     grunt.log.writeln(chalk.green('Done.'));
   }
-
-
+  
   grunt.registerMultiTask('jasmine_firefoxaddon', pkg.description, function () {
     var ctx = this.options({
         template: __dirname + '/../tasks/jasmine-firefoxaddon',
@@ -122,7 +141,7 @@ module.exports = function (grunt) {
         paths: undefined,
         binary: undefined,
         keepRunner: false,
-        port: 9989,
+        port: 9979,
         timeout : 30000,
         flags: []
       });
@@ -199,43 +218,42 @@ module.exports = function (grunt) {
     return true;
   });
 
-  grunt.registerTask('jasmine_firefoxaddon_report', pkg.description, function () {
-    var failures = 0;
-    for (var port in activeReporters) {
-      if (activeReporters[port].messages.length) {
-        activeReporters[port].messages.forEach(function(msg) {
-          if (!msg.fullName) {
-            return;
-          }
-          if (msg.status === 'passed') {
-            grunt.log.ok(msg.fullName, msg.status);
-            if (msg.failedExpectations) {
-              msg.failedExpectations.forEach(function(exp) {
-                grunt.log.warn(exp.message);
-              });
-            }
-          } else if (msg.status === 'failed') {
-            grunt.log.error(msg.fullName, msg.status);
-            if (msg.failedExpectations) {
-              msg.failedExpectations.forEach(function(exp) {
-                grunt.log.warn(exp.message);
-              });
-            }
-            failures += 1;
-          } else if (msg.status === 'pending') {
-            grunt.log.write('>> ' + msg.fullName).subhead(msg.status);
-          } else {
-            grunt.log.warn(msg.fullName);
-            console.error(msg);
-            failures += 1;
-          }
-        });
+  function finishTests(ctx) {
+    var parse = JSON.parse(ctx.messages[0]),
+      spec,
+      i = 0;
+
+    ctx.status = {failed: 0};
+    for (i = 0; i < parse.length; i += 1) {
+      spec = parse[i];
+      if (process.stdout.clearLine) {
+        process.stdout.clearLine();
+        process.stdout.cursorTo(0);
+        if (spec.status === 'passed') {
+          grunt.log.writeln(chalk.green.bold('✓') + '\t' + spec.fullName);
+        } else if (spec.status === 'failed') {
+          ctx.status.failed += 1;
+          grunt.log.writeln(chalk.red.bold('X') + '\t' + spec.fullName);
+        } else {
+          grunt.log.writeln(chalk.yellow.bold('*') + '\t' + spec.fullName);
+        }
+      } else {
+        if (spec.status === 'passed') {
+          grunt.log.writeln('✓' + spec.fullName);
+        } else if (spec.status === 'failed') {
+          ctx.status.failed += 1;
+          grunt.log.writeln('X' + spec.fullName);
+        } else {
+          grunt.log.writeln('*' + spec.fullName);
+        }
       }
     }
-    if (failures) {
-      return false;
-    } else {
-      return true;
-    }
+  }
+
+  grunt.registerTask('jasmine_firefoxaddon_report', pkg.description, function () {
+    var ctx = grunt.config.get('ctx');
+    finishTests(ctx);
+
+    return cleanup(ctx);
   });
 };
