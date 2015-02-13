@@ -127,7 +127,7 @@ module.exports = function (grunt) {
           }
         });
       } else if (req.url === '/ready') {
-        grunt.log.writeln(chalk.green('Done.'));
+        grunt.log.writeln(chalk.green('Test Runner Started.'));
         res.end('Okay.');
         clearTimeout(ctx.cleanupTimeout);
       }
@@ -172,10 +172,8 @@ module.exports = function (grunt) {
       }
     });
     grunt.config.set('jasmine_firefoxaddon_report', {
-      managed: {
-        options: {
-          ctx: ctx
-        }
+      options: {
+        ctx: ctx
       }
     });
 
@@ -231,6 +229,11 @@ module.exports = function (grunt) {
   });
 
   function finishTests(ctx) {
+    if (!ctx.messages) {
+      grunt.log.writeln(chalk.yellow.bold('Timed Out.'));
+      return;
+    }
+
     var parse = JSON.parse(ctx.messages[0]),
       spec,
       i = 0;
@@ -264,7 +267,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('jasmine_firefoxaddon_report', pkg.description, function () {
     var conf = grunt.config.get('jasmine_firefoxaddon_report'),
-      ctx = conf[this.target].options.ctx;
+      ctx = conf.options.ctx;
     finishTests(ctx);
 
     return cleanup(ctx);

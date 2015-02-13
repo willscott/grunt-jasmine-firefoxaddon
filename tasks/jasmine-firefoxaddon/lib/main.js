@@ -33,8 +33,14 @@ var testsFinished = function (result) {
   req.post();
 };
 
+var loadJasmine = function () {
+  'use strict';
+  
+};
+
 var register = function (specfile) {
   'use strict';
+  tests.push(specfile);
 };
 
 var finishLoad = function (port) {
@@ -49,35 +55,6 @@ var finishLoad = function (port) {
     }
   });
   req.get();
-};
 
-var fileDone = function (res) {
-  'use strict';
-  console.log('Testing Finished');
-  if (pendingReports > 0) {
-    onFinish = completeTesting();
-  } else {
-    completeTesting();
-  }
-};
-
-var finishLoad = function () {
-  'use strict';
-  var jsm;
-  try {
-    jsm = Cu['import'](underTest);
-  } catch (e) {
-    console.error('Exception importing ' + underTest);
-    console.error(e);
-  }
-  var symbols = jsm.EXPORTED_SYMBOLS;
-  symbols.forEach(function (symbol) {
-    console.log('Executing ' + underTest + ': ' + symbol);
-    try {
-      var retVal = jsm[symbol](testDone, fileDone);
-      tests = tests.concat(retVal);
-    } catch (e) {
-      console.error(e);
-    }
-  });
+  loadJasmine();
 };
