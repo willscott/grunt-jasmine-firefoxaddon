@@ -16,7 +16,7 @@ module.exports = function (grunt) {
     },
     jasmine_firefoxaddon: {
       selftest: {
-        src: 'test/*.js',
+        src: ['test/*.js', 'test/*.jsm'],
         options: {
           paths: 'test/selftest.js'
         }

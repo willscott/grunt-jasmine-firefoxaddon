@@ -65,7 +65,10 @@ module.exports = function (grunt) {
 
     // Copy the template
     grunt.file.recurse(ctx.template, function (file, root, dir, filename) {
-      grunt.file.copy(file, dest + '/' + filename);
+      if (!dir) {
+        dir = '';
+      }
+      grunt.file.copy(file, dest + '/' + dir + '/' +  filename);
     });
     // Copy Jasmine
     grunt.file.recurse(__dirname + '/../vendor/jasmine-core-' + ctx.version,
@@ -162,10 +165,18 @@ module.exports = function (grunt) {
     });
   
     grunt.config.set('jasmine_firefoxaddon_build', {
-      ctx: ctx
+      managed: {
+        options: {
+          ctx: ctx
+        }
+      }
     });
     grunt.config.set('jasmine_firefoxaddon_report', {
-      ctx: ctx
+      managed: {
+        options: {
+          ctx: ctx
+        }
+      }
     });
 
     if (!grunt.config.get('mozilla-addon-sdk')) {
@@ -194,7 +205,8 @@ module.exports = function (grunt) {
 
 
   grunt.registerMultiTask('jasmine_firefoxaddon_build', pkg.description, function () {
-    var ctx = grunt.config.get('ctx');
+    var conf = grunt.config.get('jasmine_firefoxaddon_build'),
+      ctx = conf[this.target].options.ctx;
 
     // Build Addon.
     buildSpec(ctx);
@@ -251,7 +263,8 @@ module.exports = function (grunt) {
   }
 
   grunt.registerTask('jasmine_firefoxaddon_report', pkg.description, function () {
-    var ctx = grunt.config.get('ctx');
+    var conf = grunt.config.get('jasmine_firefoxaddon_report'),
+      ctx = conf[this.target].options.ctx;
     finishTests(ctx);
 
     return cleanup(ctx);
