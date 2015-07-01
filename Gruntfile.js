@@ -29,4 +29,5 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
 
   grunt.registerTask('test', ['jshint', 'jasmine_firefoxaddon']);
+  grunt.registerTask('default', ['test']);
 };

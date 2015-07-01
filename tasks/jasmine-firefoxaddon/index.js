@@ -1,4 +1,5 @@
-/*globals require,console */
+/*globals require,console,setTimeout:true,setInterval:true,clearTimeout:true,
+  clearInterval:true,atob:true,btoa:true */
 
 var setTimeout = require("sdk/timers").setTimeout,
   setInterval = require("sdk/timers").setInterval,

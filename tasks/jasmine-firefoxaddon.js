@@ -9,7 +9,7 @@ module.exports = function (grunt) {
     fs = require('fs-extra'),
     pkg = require('../package.json');
 
-  grunt.loadNpmTasks('grunt-mozilla-addon-sdk');
+  grunt.loadNpmTasks('grunt-jpm');
 
 
   function addFiles(files, to, tagFilter) {
@@ -177,26 +177,10 @@ module.exports = function (grunt) {
       }
     });
 
-    if (!grunt.config.get('mozilla-addon-sdk')) {
-      grunt.config.set('mozilla-addon-sdk', {
-        '1_17': {
-          options: {
-            revision: "1.17"
-          }
-        },
-        master: {
-          options: {
-            revision: "master",
-            github: true
-          }
-        }
-      });
-    }
 
     grunt.task.run([
-      'mozilla-addon-sdk:1_17',
       'jasmine_firefoxaddon_build',
-      'mozilla-cfx:jasmine_firefoxaddon_test',
+      'jpm:run',
       'jasmine_firefoxaddon_report'
     ]);
   });
@@ -204,7 +188,7 @@ module.exports = function (grunt) {
 
   grunt.registerMultiTask('jasmine_firefoxaddon_build', pkg.description, function () {
     var conf = grunt.config.get('jasmine_firefoxaddon_build'),
-      ctx = conf[this.target].options.ctx;
+    ctx = conf[this.target].options.ctx;
 
     // Build Addon.
     buildSpec(ctx);
@@ -212,16 +196,12 @@ module.exports = function (grunt) {
     // Create Listener.
     startReporter(ctx);
 
-    // Configure downstream cfx run to use the generated addon.
-    if (!grunt.config.get('mozilla-cfx')) {
-      grunt.config.set('mozilla-cfx', {
-        'jasmine_firefoxaddon_test': {
-          options: {
-            'mozilla-addon-sdk': "1_17",
-            extension_dir: ctx.outfile,
-            command: "run",
-            'arguments': "-v"
-          }
+    // Configure downstream jpm run to use the generated addon.
+    if (!grunt.config.get('jpm')) {
+      grunt.config.set('jpm', {
+        options: {
+          src: ctx.outfile,
+          xpi: ctx.outfile
         }
       });
     }
@@ -235,8 +215,8 @@ module.exports = function (grunt) {
     }
 
     var parse = JSON.parse(ctx.messages[0]),
-      spec,
-      i = 0;
+    spec,
+    i = 0;
 
     ctx.status = {failed: 0};
     for (i = 0; i < parse.length; i += 1) {
