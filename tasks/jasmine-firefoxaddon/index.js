@@ -1,5 +1,12 @@
 /*globals require,console,setTimeout:true,setInterval:true,clearTimeout:true,
-  clearInterval:true,atob:true,btoa:true */
+  clearInterval:true,atob:true,btoa:true,jasmine:true */
+
+// TODO: make it work, switch to npm-provided jasmine-core
+console.log("START");
+var jasmineRequire = require('./lib/jasmine-core/jasmine.js');
+console.log("JRQ");
+jasmine = jasmineRequire.core(jasmineRequire);
+console.log("WOO");
 
 var setTimeout = require("sdk/timers").setTimeout,
   setInterval = require("sdk/timers").setInterval,
@@ -13,6 +20,7 @@ var atob = Cu['import']("resource://gre/modules/Services.jsm", {}).atob,
 
 var self = require("sdk/self");
 var request = require("sdk/request").Request;
+
 
 var tests = [],
   reports = [],
@@ -34,11 +42,6 @@ var testsFinished = function (result) {
   req.post();
 };
 
-var loadJasmine = function () {
-  'use strict';
-  
-};
-
 var register = function (specfile) {
   'use strict';
   tests.push(specfile);
@@ -56,6 +59,4 @@ var finishLoad = function (port) {
     }
   });
   req.get();
-
-  loadJasmine();
 };

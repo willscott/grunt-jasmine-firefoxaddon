@@ -93,8 +93,8 @@ module.exports = function (grunt) {
     tags += "finishLoad(" + ctx.port + ");";
 
     // Update the template with found specs.
-    tags = grunt.file.read(dest + '/lib/main.js') + tags;
-    grunt.file.write(dest + '/lib/main.js', tags);
+    tags = grunt.file.read(dest + '/index.js') + tags;
+    grunt.file.write(dest + '/index.js', tags);
 
     grunt.log.writeln(chalk.green('Done.'));
   }
