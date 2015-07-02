@@ -3,10 +3,12 @@
 
 // TODO: make it work, switch to npm-provided jasmine-core
 console.log("START");
-var jasmineRequire = require('./lib/jasmine-core/jasmine.js');
+var jasmineRequire = require('jasmine-core');
 console.log("JRQ");
+console.dir(jasmineRequire);
 jasmine = jasmineRequire.core(jasmineRequire);
 console.log("WOO");
+console.dir(jasmine);
 
 var setTimeout = require("sdk/timers").setTimeout,
   setInterval = require("sdk/timers").setInterval,

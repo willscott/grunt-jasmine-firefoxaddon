@@ -9,8 +9,8 @@ module.exports = function (grunt) {
     fs = require('fs-extra'),
     pkg = require('../package.json');
 
+  var jasminePath = require('path').dirname(require.resolve('jasmine-core'));
   grunt.loadNpmTasks('grunt-jpm');
-
 
   function addFiles(files, to, tagFilter) {
     var tags = '';
@@ -71,12 +71,14 @@ module.exports = function (grunt) {
       grunt.file.copy(file, dest + '/' + dir + '/' +  filename);
     });
     // Copy Jasmine
-    grunt.file.recurse(__dirname + '/../vendor/jasmine-core-' + ctx.version,
+    grunt.file.recurse(
+      jasminePath,
       function (file, root, dir, filename) {
         if (!dir) {
           dir = '';
         }
-        grunt.file.copy(file, dest + '/lib/jasmine-core/' + dir + '/' + filename);
+        grunt.file.copy(file,
+                        dest + '/node_modules/jasmine-core/' + dir + '/' + filename);
       });
     // Make a profile directory.
     grunt.file.mkdir(ctx.outfile + '/profile');
@@ -138,16 +140,16 @@ module.exports = function (grunt) {
   
   grunt.registerMultiTask('jasmine_firefoxaddon', pkg.description, function () {
     var ctx = this.options({
-        template: __dirname + '/../tasks/jasmine-firefoxaddon',
-        version: '2.0.0',
-        outfile: '.build',
-        paths: undefined,
-        binary: undefined,
-        keepRunner: false,
-        port: 9979,
-        timeout : 30000,
-        flags: []
-      });
+      template: __dirname + '/../tasks/jasmine-firefoxaddon',
+      version: '2.0.0',
+      outfile: '.build',
+      paths: undefined,
+      binary: undefined,
+      keepRunner: false,
+      port: 9979,
+      timeout : 30000,
+      flags: []
+    });
 
     if (grunt.option('debug')) {
       grunt.log.debug(JSON.stringify(ctx));
@@ -247,7 +249,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('jasmine_firefoxaddon_report', pkg.description, function () {
     var conf = grunt.config.get('jasmine_firefoxaddon_report'),
-      ctx = conf.options.ctx;
+    ctx = conf.options.ctx;
     finishTests(ctx);
 
     return cleanup(ctx);
