@@ -3,7 +3,7 @@
 
 // TODO: make it work, switch to npm-provided jasmine-core
 console.log("START");
-var jasmineRequire = require('jasmine-core');
+var jasmineRequire = require('./jasmine-core/jasmine-core');
 console.log("JRQ");
 console.dir(jasmineRequire);
 jasmine = jasmineRequire.core(jasmineRequire);
