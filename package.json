@@ -24,6 +24,7 @@
   "homepage": "https://github.com/willscott/grunt-jasmine-firefoxaddon",
   "devDependencies": {
     "grunt": "^0.4.5",
+    "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-jshint": "^0.11.2"
   },
   "dependencies": {
@@ -32,6 +33,7 @@
     "fs-extra": "^0.20.1",
     "glob": "^5.0.12",
     "grunt": "^0.4.5",
+    "grunt-browserify": "^4.0.0",
     "grunt-jpm": "^0.1.1",
     "jasmine-core": "^2.3.4"
   },

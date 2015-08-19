@@ -1,87 +1,69 @@
-/*globals require,console,setTimeout:true,setInterval:true,clearTimeout:true,
-  clearInterval:true,atob:true,btoa:true,jasmine:true */
+// Jasmine needs to replace these when a clock is installed, but gets confused
+var { setTimeout, setInterval,
+      clearTimeout, clearInterval } = require("sdk/timers");
 
-var setTimeout = require("sdk/timers").setTimeout,
-    setInterval = require("sdk/timers").setInterval,
-    clearTimeout = require("sdk/timers").clearTimeout,
-    clearInterval = require("sdk/timers").clearInterval;
+const { Cu } = require("chrome");
+const { atob, btoa } = Cu.import("resource://gre/modules/Services.jsm", {});
+const self = require("sdk/self");
+var Request = require("sdk/request").Request;
 
-var Cu = require("chrome").Cu;
+var underTest = self.data.url('spec.jsm');
+var tests = [];
+var pendingReports = 0;
+var onFinish = null;
+var stayOpen = false;
 
-var atob = Cu['import']("resource://gre/modules/Services.jsm", {}).atob,
-  btoa = Cu['import']("resource://gre/modules/Services.jsm", {}).btoa;
-
-var self = require("sdk/self");
-var request = require("sdk/request").Request;
-
-// Load Jasmine
-var jasmineRequire = require('./jasmine-core/jasmine');
-jasmine = jasmineRequire.core(jasmineRequire);
-
-var theGlobal = {
-  setTimeout: setTimeout,
-  clearTimeout: clearTimeout
-};
-
-jasmine.getGlobal = function(g) {
-  return g;
-}.bind({}, theGlobal);
-
-var env = jasmine.getEnv({
-  global: theGlobal
-});
-var jasmineInterface = jasmineRequire.interface(jasmine, env);
-
-// Jasmine interface (like describe) need to be on the global scope.
-// Only way I can find to do that is set them as raw symbols.
-for (var property in jasmineInterface) {
-  eval(property + " = jasmineInterface['" + property + "'];");
-}
-
-var tests = [],
-  reports = [],
-  reportPort = 9979;
-
-var testsFinished = function (result) {
-  'use strict';
-  var req = request({
+var testDone = function(res) {
+  pendingReports += 1;
+  console.info('[' + res.status + ']: ' + res.fullName);
+  var req = Request({
     url: 'http://localhost:9989/put',
-    content: btoa(JSON.stringify(result)),
+    content: btoa(JSON.stringify(res)),
     overrideMimeType: "text/plain; charset=latin1",
     onComplete: function (response) {
-      if (response.indexOf('kill') > -1) {
-        var system = require("sdk/system");
-        system.exit(0);
+      pendingReports -= 1;
+      if (onFinish && pendingReports === 0) {
+        onFinish();
       }
     }
   });
   req.post();
 };
 
-var register = function (specfile) {
-  'use strict';
-  tests.push(specfile);
+var completeTesting = function() {
+  if (!stayOpen) {
+    Cu.unload(underTest);
+
+    var system = require("sdk/system");
+    system.exit(0);
+  }
 };
 
-var runTests = function () {
-  tests.forEach(function(test) {
-    console.log('Executing: ' + test);
-    // Doesn't work yet, jasmine not in the scope of loaded test
-    require(test);
-  });
+var fileDone = function(res) {
+  console.log('Testing Finished');
+  if (pendingReports > 0) {
+    onFinish = completeTesting();
+  } else {
+    completeTesting();
+  }
 };
 
-var finishLoad = function (port) {
-  'use strict';
-  reportPort = port;
-
-  var req = request({
-    url: 'http://localhost:' + port + '/ready',
-    overrideMimeType: "text/plain; charset=latin1",
-    onComplete: function (response) {
-      console.info('Reported Addon Startup.');
+var finishLoad = function() {
+  var jsm;
+  try {
+    jsm = Cu.import(underTest);
+  } catch (e) {
+    console.error('Exception importing ' + underTest);
+    console.error(e);
+  }
+  var symbols = jsm.EXPORTED_SYMBOLS;
+  symbols.forEach(function(symbol) {
+    console.log('Executing ' + underTest + ': ' + symbol);
+    try {
+      var retVal = jsm[symbol](testDone, fileDone);
+      tests = tests.concat(retVal);
+    } catch (e) {
+      console.error(e);
     }
   });
-  req.get();
-  runTests();
 };
