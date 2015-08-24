@@ -17,7 +17,8 @@ module.exports = function (grunt) {
       }
     },
     jasmine_firefoxaddon: {
-      tests: ['test/selftest.js']
+      tests: ['test/selftest.js'],
+      helpers: ['test/testHelper.jsm']
     },
     clean: ['spec.jsm', '.build/']
   });

@@ -73,15 +73,25 @@ module.exports = function (grunt) {
         }
       });
     }
-    // Add actual tests to spec file, copy them as needed
+    // Add actual tests to spec file
+    var divider = new RegExp('^.*HERE$', 'm');
     var specfile = grunt.file.read('.build/spec.js');
-    var output = specfile.split(RegExp('^.*HERE$', 'm'))[0];
+    var specout = specfile.split(divider)[0];
     grunt.config.get('jasmine_firefoxaddon').tests.forEach(function (test) {
-      output += '\nrequire("../' + test + '");';
+      specout += '\nrequire("../' + test + '");';
     });
-    output += specfile.split(RegExp('^.*HERE$', 'm'))[1];
-    grunt.file.write('.build/spec.js', output);
-    grunt.file.copy('test/testHelper.jsm', '.build/data/testHelper.jsm');
+    specout += specfile.split(divider)[1];
+    grunt.file.write('.build/spec.js', specout);
+    //grunt.file.copy('test/testHelper.jsm', '.build/data/testHelper.jsm');
+    // Add the helpers to the index file and copy them into addon
+    var indexfile = grunt.file.read('.build/index.js');
+    var indexout = indexfile.split(divider)[0];
+    grunt.config.get('jasmine_firefoxaddon').helpers.forEach(function (helper) {
+      grunt.file.copy(helper, '.build/data/' + helper);
+      indexout += '\nCu.import(self.data.url("' + helper + '"));';
+    });
+    indexout += indexfile.split(divider)[1];
+    grunt.file.write('.build/index.js', indexout);
     return true;
   });
 

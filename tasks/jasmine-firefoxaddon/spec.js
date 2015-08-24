@@ -62,7 +62,7 @@ runTests = function(onTest, finished) {
   var loggingReporter = new LoggingReporter(onTest, finished);
   env.addReporter(loggingReporter);
 
-  // grunt will write the require(test) statements HERE
+  // grunt will write the Cu.import and require(test) statements HERE
 
   var specs = [];
   spiderSpecs(specs, env.topSuite());

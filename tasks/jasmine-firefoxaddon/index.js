@@ -8,6 +8,8 @@ const self = require("sdk/self");
 var Request = require("sdk/request").Request;
 
 var underTest = self.data.url('spec.jsm');
+// Helpers will be loaded HERE
+
 var tests = [];
 var pendingReports = 0;
 var onFinish = null;
