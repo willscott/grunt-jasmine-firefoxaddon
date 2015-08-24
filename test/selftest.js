@@ -8,6 +8,7 @@ describe('jasmine-chromeapp', function () {
 
   it('Has helper files copied appropriately', function (done) {
     // Checks to see that testHelper.jsm was loaded
-    expect(test()).to.be('helper loaded');
+    expect(test()).toBe('helper loaded');
+    done();
   });
 });
