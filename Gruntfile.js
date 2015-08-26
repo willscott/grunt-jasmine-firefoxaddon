@@ -8,25 +8,26 @@ module.exports = function (grunt) {
       all: [
         'Gruntfile.js',
         'tasks/**/*.js',
-        '!tasks/**/lib/main.js'
+        '!tasks/build-test-addon.js',
+        '!tasks/**/index.js',
+        '!tasks/**/spec.js'
       ],
       options: {
         jshintrc: '.jshintrc'
       }
     },
     jasmine_firefoxaddon: {
-      selftest: {
-        src: ['test/*.js', 'test/*.jsm'],
-        options: {
-          paths: 'test/selftest.js'
-        }
-      }
-    }
+      tests: ['test/selftest.js'],
+      helpers: ['test/testHelper.jsm']
+    },
+    clean: ['spec.jsm', '.build/']
   });
 
   grunt.loadTasks('tasks');
 
+  grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-jshint');
 
   grunt.registerTask('test', ['jshint', 'jasmine_firefoxaddon']);
+  grunt.registerTask('default', ['test']);
 };

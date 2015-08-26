@@ -7,15 +7,8 @@ describe('jasmine-chromeapp', function () {
   });
 
   it('Has helper files copied appropriately', function (done) {
-    const {Cu} = require("chrome");
-    try {
-      var helper = self.data.url('testHelper.jsm');
-      var jsm = Cu.import(helper);
-      expect(jsm.test()).to.be('helper loaded');
-      Cu.unload(helper);
-    } catch (e) {
-      console.error('Exception importing ' + underTest);
-      console.error(e);
-    }
+    // Checks to see that testHelper.jsm was loaded
+    expect(test()).toBe('helper loaded');
+    done();
   });
 });
