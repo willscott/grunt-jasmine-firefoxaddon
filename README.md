@@ -30,12 +30,14 @@ Run this task with the ```grunt jasmine_firefoxaddon``` command.
 Automatically builds and maintains the spec runner and reports results back to
 the grunt console. Uses jpm provided by mozilla to run a dynamically constructed
 firefox addon that runs jasmine specs by using browserify. Allows for copying
-and loading of custom `.jsm` files.
+and loading of custom `.jsm` files. The addon is built in the `.buildff/` path,
+and is not deleted after running so you can inspect manually (though you
+probably want to add it to your .gitignore).
 
 Note that if your addon needs to access other resources, you will need to make
 the files available (e.g. with
 [grunt-contrib-copy](https://www.npmjs.com/package/grunt-contrib-copy)) under
-the path `.build/data/...` and then access them in your addon with the path
+the path `.buildff/data/...` and then access them in your addon with the path
 `jid1-mkagayemb0e5nq-at-jetpack/data/...` (you can also use `self.data.url(...)`
 if
 [the self API](https://developer.mozilla.org/en-US/Add-ons/SDK/High-Level_APIs/self)
