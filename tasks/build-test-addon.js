@@ -13,7 +13,7 @@ module.exports = function (grunt) {
     var name = this.target;
     
     var ctx = this.options({
-      template: 'tasks/jasmine-firefoxaddon/',
+      template: __dirname + '/../tasks/jasmine-firefoxaddon/',
       helper: undefined,
       timeout : 10000,
       port: 9989,
@@ -42,8 +42,8 @@ module.exports = function (grunt) {
           if (req.url === '/') {
             res.writeHead(200, {'Content-Type': 'text/html'});
             res.end('<html>' +
-                'Hi, App should also load.' +
-                '</html>');
+                    'Hi, App should also load.' +
+                    '</html>');
           } else if (req.url === '/put') {
             req.setEncoding('utf8');
             req.on('data', function(chunk) {
