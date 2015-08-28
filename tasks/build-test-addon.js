@@ -161,6 +161,8 @@ module.exports = function (grunt) {
         });
       }
     }
+    grunt.file.setBase('../');  // to delete plugin, need to cd up
+    grunt.file['delete']('.buildff');
     if (failures) {
       return false;
     } else {
