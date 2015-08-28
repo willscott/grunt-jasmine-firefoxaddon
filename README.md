@@ -6,7 +6,7 @@
 Getting Started
 ---------------
 
-This plugin requires Grunt ```~0.4.0```
+This plugin requires Grunt ```^0.4.5```
 
 If you haven't used Grunt before, be sure to check out the Getting Started
 guide, which explains how to create your grunt file. Once you're familiar with
