@@ -61,7 +61,7 @@ module.exports = function (grunt) {
       }
     },
 
-    clean: ['.buildff/']
+    clean: ['.build/']
   });
 
   grunt.loadTasks('tasks');
