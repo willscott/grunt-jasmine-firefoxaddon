@@ -48,8 +48,8 @@ iterations of this tool may be able to make the process smoother.
 Customize your SpecRunner
 -------------------------
 
-Use your own files in the app to customize your tests. 
-
+Use your own files in the app to customize your tests. For all of the below, you
+can use [node globbing patterns](https://github.com/isaacs/node-glob).
 
 ### Options
 
@@ -58,11 +58,24 @@ Type: `String|Array`
 
 The spec files you want to run.
 
+#### resources
+Type: `String|Array`
+
+Resources (.js, .json, etc.) needed for the tests (will be made available to the
+addon under `data/scripts`, but *not* automatically loaded into the addon - your
+tests can pull them in as needed from
+`jid1-mkagayemb0e5nq-at-jetpack/data/scripts`). These files *can* be `.jsm`,
+which would allow them to be loaded via `Components.utils.import`, or they can
+be of other types (which will require different mechanisms to load, currently
+left as an exercise to the user - future updates to this tool may try to smooth
+common use cases).
+
 #### helpers
 Type: `String|Array`
 
 Custom JavaScript module (`.jsm`) files you wish you load into your addon during
-test.
+test. These files *are* automatically loaded during addon setup, but *must* be
+`.jsm` types (JavaScript with an `EXPORTED_SYMBOLS` array to define visibility).
 
 #### options.timeout
 Type: `Number`
