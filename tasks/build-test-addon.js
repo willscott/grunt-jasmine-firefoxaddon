@@ -96,7 +96,7 @@ module.exports = function (grunt) {
     // Copy the source files
     grunt.file.expand(grunt.config.get('jasmine_firefoxaddon').resources)
       .forEach(function (resource) {
-        grunt.file.copy(resource, '.build/data/scripts/' + resource);
+        grunt.file.copy(resource, '.build/data/' + resource);
       });
     return true;
   });
