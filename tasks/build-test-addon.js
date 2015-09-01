@@ -68,17 +68,17 @@ module.exports = function (grunt) {
     if (!grunt.config.get('jpm')) {
       grunt.config.set('jpm', {
         options: {
-          src: './.buildff/',
-          xpi: './.buildff/'
+          src: './.build/',
+          xpi: './.build/'
         }
       });
     }
     var divider = new RegExp('^.*HERE$', 'm');
-    var specfile = grunt.file.read('.buildff/spec.js');
+    var specfile = grunt.file.read('.build/spec.js');
     var specout = specfile.split(divider)[0];
     // Add the helpers to the spec file and copy them into addon
     grunt.config.get('jasmine_firefoxaddon').helpers.forEach(function (helper) {
-      grunt.file.copy(helper, '.buildff/data/' + helper);
+      grunt.file.copy(helper, '.build/data/' + helper);
       // NOTE - hardcoding the path because self.data.url not visible in spec
       // This path is set in tasks/jasmine-firefoxaddon/package.json
       specout += '\nComponents.utils.import("' +
@@ -89,14 +89,14 @@ module.exports = function (grunt) {
       specout += '\nrequire("../' + test + '");';
     });
     specout += specfile.split(divider)[1];
-    grunt.file.write('.buildff/spec.js', specout);
+    grunt.file.write('.build/spec.js', specout);
     return true;
   });
 
   grunt.config.set('build-test-addon', {
     main: {
       files: {
-        '.buildff': [ 'spec.jsm' ]
+        '.build': [ 'spec.jsm' ]
       },
       options: {
         helper: [
@@ -112,8 +112,8 @@ module.exports = function (grunt) {
   if (!grunt.config.get('jpm')) {
     grunt.config.set('jpm', {
       options: {
-        src: './.buildff/',
-        xpi: './.buildff/'
+        src: './.build/',
+        xpi: './.build/'
       }
     });
   }
@@ -122,7 +122,7 @@ module.exports = function (grunt) {
     browserify: {
       jasmine: {
         files: {
-          '.buildff/data/spec.jsm': ['.buildff/spec.js']
+          '.build/data/spec.jsm': ['.build/spec.js']
         }
       }
     }
@@ -161,6 +161,8 @@ module.exports = function (grunt) {
         });
       }
     }
+    grunt.file.setBase('../');  // to delete plugin, need to cd up
+    grunt.file['delete']('.build');
     if (failures) {
       return false;
     } else {

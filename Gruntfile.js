@@ -61,7 +61,7 @@ module.exports = function (grunt) {
       }
     },
 
-    clean: ['spec.jsm', '.build/']
+    clean: ['.build/']
   });
 
   grunt.loadTasks('tasks');
