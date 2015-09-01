@@ -14,7 +14,8 @@ module.exports = function (grunt) {
     
     var ctx = this.options({
       template: __dirname + '/../tasks/jasmine-firefoxaddon/',
-      helper: undefined,
+      resources: undefined,
+      helpers: undefined,
       timeout : 10000,
       port: 9989,
       stayOpen: false
@@ -77,19 +78,26 @@ module.exports = function (grunt) {
     var specfile = grunt.file.read('.build/spec.js');
     var specout = specfile.split(divider)[0];
     // Add the helpers to the spec file and copy them into addon
-    grunt.config.get('jasmine_firefoxaddon').helpers.forEach(function (helper) {
-      grunt.file.copy(helper, '.build/data/' + helper);
-      // NOTE - hardcoding the path because self.data.url not visible in spec
-      // This path is set in tasks/jasmine-firefoxaddon/package.json
-      specout += '\nComponents.utils.import("' +
-        'resource://jid1-mkagayemb0e5nq-at-jetpack/data/' + helper + '");';
-    });
+    grunt.file.expand(grunt.config.get('jasmine_firefoxaddon').helpers)
+      .forEach(function (helper) {
+        grunt.file.copy(helper, '.build/data/' + helper);
+        // NOTE - hardcoding the path because self.data.url not visible in spec
+        // This path is set in tasks/jasmine-firefoxaddon/package.json
+        specout += '\nComponents.utils.import("' +
+          'resource://jid1-mkagayemb0e5nq-at-jetpack/data/' + helper + '");';
+      });
     // Add actual tests to spec file
-    grunt.config.get('jasmine_firefoxaddon').tests.forEach(function (test) {
-      specout += '\nrequire("../' + test + '");';
-    });
+    grunt.file.expand(grunt.config.get('jasmine_firefoxaddon').tests)
+      .forEach(function (test) {
+        specout += '\nrequire("../' + test + '");';
+      });
     specout += specfile.split(divider)[1];
     grunt.file.write('.build/spec.js', specout);
+    // Copy the source files
+    grunt.file.expand(grunt.config.get('jasmine_firefoxaddon').resources)
+      .forEach(function (resource) {
+        grunt.file.copy(resource, '.build/data/scripts/' + resource);
+      });
     return true;
   });
 
@@ -199,9 +207,6 @@ module.exports = function (grunt) {
     ctx.dir = fs.mkdirpSync(ctx.target) || fs.realpathSync(ctx.target);
 
     var scripts = getFiles(ctx.files);
-    if (ctx.helper) {
-      scripts = scripts.concat(getFiles(ctx.helper));
-    }
     var toLink = "";
     
     fs.mkdirpSync(ctx.dir + '/data');
