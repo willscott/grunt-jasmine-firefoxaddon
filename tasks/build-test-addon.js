@@ -75,14 +75,17 @@ module.exports = function (grunt) {
       });
     }
     var divider = new RegExp('^.*HERE$', 'm');
+    var indexfile = grunt.file.read('.build/index.js');
+    var indexout = indexfile.split(divider)[0];
     var specfile = grunt.file.read('.build/spec.js');
     var specout = specfile.split(divider)[0];
-    // Add the helpers to the spec file and copy them into addon
+    // Add the helpers to the spec and index files and copy them into addon
     grunt.file.expand(grunt.config.get('jasmine_firefoxaddon').helpers)
       .forEach(function (helper) {
         grunt.file.copy(helper, '.build/data/' + helper);
         // NOTE - hardcoding the path because self.data.url not visible in spec
         // This path is set in tasks/jasmine-firefoxaddon/package.json
+        indexout += 'Cu.import(self.data.url(' + helper + '))';
         specout += '\nComponents.utils.import("' +
           'resource://jid1-mkagayemb0e5nq-at-jetpack/data/' + helper + '");';
       });
