@@ -38,8 +38,8 @@ Note that if your addon needs to access other resources, you will need to make
 the files available (e.g. with
 [grunt-contrib-copy](https://www.npmjs.com/package/grunt-contrib-copy)) under
 the path `.build/data/...` and then access them in your addon with the path
-`jid1-mkagayemb0e5nq-at-jetpack/data/...` (you can also use `self.data.url(...)`
-if
+`resource://grunt-jasmine-firefoxaddon-runner/data/...` (you can also use
+`self.data.url(...)` if
 [the self API](https://developer.mozilla.org/en-US/Add-ons/SDK/High-Level_APIs/self)
 is available to you). This is due to the structure of Firefox addons - future
 iterations of this tool may be able to make the process smoother.
@@ -63,11 +63,12 @@ Type: `String|Array`
 
 Resources (.js, .json, etc.) needed for the tests (will be made available to the
 addon under `data/`, but *not* automatically loaded into the addon - your tests
-can pull them in as needed from `jid1-mkagayemb0e5nq-at-jetpack/data/`). These
-files *can* be `.jsm`, which would allow them to be loaded via
-`Components.utils.import`, or they can be of other types (which will require
-different mechanisms to load, currently left as an exercise to the user - future
-updates to this tool may try to facilitate common use cases).
+can pull them in as needed from
+`resource://grunt-jasmine-firefoxaddon-runner/data/`). These files *can* be
+`.jsm`, which would allow them to be loaded via `Components.utils.import`, or
+they can be of other types (which will require different mechanisms to load,
+currently left as an exercise to the user - future updates to this tool may try
+to facilitate common use cases).
 
 #### helpers
 Type: `String|Array`

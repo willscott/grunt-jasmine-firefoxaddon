@@ -87,7 +87,7 @@ module.exports = function (grunt) {
         // This path is set in tasks/jasmine-firefoxaddon/package.json
         indexout += 'Cu.import(self.data.url("' + helper + '"))';
         specout += '\nComponents.utils.import("' +
-          'resource://jid1-mkagayemb0e5nq-at-jetpack/data/' + helper + '");';
+          'resource://grunt-jasmine-firefoxaddon-runner/data/' + helper + '");';
       });
     // Add actual tests to spec file
     grunt.file.expand(grunt.config.get('jasmine_firefoxaddon').tests)

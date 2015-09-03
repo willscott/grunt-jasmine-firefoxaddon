@@ -1,7 +1,6 @@
 {
   "name": "grunt-jasmine-firefoxaddon-runner",
   "title": "grunt-jasmine-firefoxaddon test runner",
-  "id": "jid1-mKAgaYEMB0e5NQ@jetpack",
   "description": "An addon for running jasmine tests.",
   "author": "Will Scott <willscott@gmail.com>",
   "license": "Apache 2.0",

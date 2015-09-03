@@ -7,9 +7,9 @@ describe('jasmine-chromeapp', function () {
   });
 
   it('Copies resource files', function () {
-    var datapath = 'resource://jid1-mkagayemb0e5nq-at-jetpack/data/';
-    Components.utils.import(datapath + 'test/resource1.js');
-    Components.utils.import(datapath + 'test/resource2.js');
+    var datapath = 'resource://grunt-jasmine-firefoxaddon-runner/data/';
+    Components.utils.import(datapath + 'test/resource1.jsm');
+    Components.utils.import(datapath + 'test/resource2.jsm');
     expect(resource1).toBe('Loaded first resource file');
     expect(resource2).toBe('Loaded second resource file');
   });
