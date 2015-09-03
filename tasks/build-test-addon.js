@@ -85,7 +85,7 @@ module.exports = function (grunt) {
         grunt.file.copy(helper, '.build/data/' + helper);
         // NOTE - hardcoding the path because self.data.url not visible in spec
         // This path is set in tasks/jasmine-firefoxaddon/package.json
-        indexout += 'Cu.import(self.data.url(' + helper + '))';
+        indexout += 'Cu.import(self.data.url("' + helper + '"))';
         specout += '\nComponents.utils.import("' +
           'resource://jid1-mkagayemb0e5nq-at-jetpack/data/' + helper + '");';
       });
@@ -94,7 +94,9 @@ module.exports = function (grunt) {
       .forEach(function (test) {
         specout += '\nrequire("../' + test + '");';
       });
+    indexout += indexfile.split(divider)[1];
     specout += specfile.split(divider)[1];
+    grunt.file.write('.build/index.js', indexout);
     grunt.file.write('.build/spec.js', specout);
     // Copy the source files
     grunt.file.expand(grunt.config.get('jasmine_firefoxaddon').resources)
