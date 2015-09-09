@@ -3,6 +3,7 @@ Components.utils.import("resource://gre/modules/Timer.jsm");
 Components.utils.import('resource://gre/modules/Services.jsm');
 
 XMLHttpRequest = Components.Constructor("@mozilla.org/xmlextras/xmlhttprequest;1", "nsIXMLHttpRequest");
+Promise = require("es6-promise").Promise;
 
 var hiddenWindow = Services.appShell.hiddenDOMWindow;
 mozRTCPeerConnection = hiddenWindow.mozRTCPeerConnection;
