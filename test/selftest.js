@@ -18,13 +18,4 @@ describe('jasmine-firefoxaddon', function () {
     // Checks to see that testHelper.jsm was loaded
     expect(test()).toBe('helper loaded');
   });
-
-  it('Can use Promises', function (done) {
-    expect(Promise).toBeDefined();
-    var promise = new Promise(function(resolve, reject) {
-      expect(true).toBe(true);
-      resolve();
-    });
-    promise.then(done);
-  });
 });
