@@ -82,3 +82,26 @@ Type: `Number`
 Default: `10000`
 
 How many milliseconds to wait for the browser to start up before failing.
+
+
+### Issues/debugging
+
+Ideally this runner should "just work" with your tests - however, if it doesn't
+here are a few common issues and suggested approaches:
+
+- The path where resources are (`grunt-jasmine-firefoxaddon-runner/data/...`)
+may conflict with the path you need to specify if you run your tests in other
+environments. In that case, you can put logic to set the Firefox-addon-specific
+path in a block like `if (typeof window === 'undefined') { path = ... }` - this
+assumes that `window` is defined in your other relevant environments (it isn't
+within the scope of a Firefox addon).
+- If you're using [freedom.js](https://github.com/freedomjs/freedom) you need
+to ensure that your module actually loads and does something (e.g. emits a
+message from the WebWorker to the "front-end"). If it doesn't then the test
+runner may terminate prematurely and give fairly uninformative error messages
+like "error loading resource" (referring usually to some part of the freedom
+module). [This is an example of a minimal working freedom.js module]
+(https://github.com/trevj/grunt-jasmine-firefoxaddon-test/) for this runner.
+
+If you encounter some other problem then feel free to file an issue in this
+GitHub repository.
