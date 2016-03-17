@@ -174,7 +174,6 @@ module.exports = function (grunt) {
         });
       }
     }
-    grunt.file.setBase('../');  // to delete plugin, need to cd up
     grunt.file['delete']('.build');
     if (failures) {
       return false;
