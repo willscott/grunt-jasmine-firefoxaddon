@@ -1,6 +1,6 @@
 {
   "name": "grunt-jasmine-firefoxaddon",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Grunt task to run jasmine tests in a firefox addon",
   "scripts": {
     "test": "grunt test"
